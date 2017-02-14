@@ -1,6 +1,8 @@
 #-------------------------------------------------------------------------------
 # Produce random files
+#   Support file to generate content
 #-------------------------------------------------------------------------------
+
 #from PIL import Image
 import numpy
 import uuid
@@ -24,7 +26,8 @@ def load_word_list():
 
 '''
 # TODO:
-#   - This is by now not supported as PIL (pillow) package is required to produce output and may not be available locally
+#   - This is by now not supported as PIL (pillow) package 
+#       is required to produce output and may not be available locally
 #-------------------------------------------------------------------------------
 # Create a valid but random image (jpeg or png)
 #-------------------------------------------------------------------------------
@@ -64,7 +67,7 @@ def get_image(size, extension):
 
 #-------------------------------------------------------------------------------
 # Produces a random text from the word_list given the size in bytes.
-# Returns exactly this amount of bytes.
+# Returns exactly this amount of bytes, eventually truncating a word.
 #-------------------------------------------------------------------------------
 def get_text(size):
     t = ""
@@ -132,4 +135,5 @@ def make_file(size, file_type):
         tfile.write(get_text(size-4))
         tfile.close()
         return fname
+
 

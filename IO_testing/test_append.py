@@ -1,3 +1,8 @@
+#-------------------------------------------------------------------------------
+# Append-Flush-Close Write class
+#   Class for testing append-flush-close to disk: {open_append-write-flush-close-wait}...
+#-------------------------------------------------------------------------------
+
 import os
 import sys
 import time
@@ -7,12 +12,10 @@ from argparse import ArgumentParser
 from common_utils import *
 
 
-
 #-------------------------------------------------------------------------------
 # TODO: 
 #   - By now the payload is stored in memory before being dumped to disk (it will not work with huge payloads)
-#   - How do I recover if try catch gets stuck as well? This would cause a loss of statistics...
-#   If possible, store statistics on the local machine
+#   - Is it possible, store logs on the local machine? If I get stuck on the mount I will lose logs as well
 #-------------------------------------------------------------------------------
 
 
@@ -23,9 +26,6 @@ from common_utils import *
 def process_opt():
     usage = """usage: test_write.py [options]"""
     parser = ArgumentParser(usage=usage)
-
-    parser.add_argument("--output_folder", dest="out_dir", type=str, 
-              help="Absolute path where to write logs and files")
 
     parser.add_argument("--file_no", dest="file_no", type=int, required=True, 
               help="Number of files to be generated")
@@ -45,17 +45,28 @@ def process_opt():
     parser.add_argument("--sanity_check", dest="check_data", action='store_true', default=False, 
               help="Read data from disk and compare MD5 checksums")
 
+    parser.add_argument("--output_folder", dest="out_dir", type=str, 
+              help="Absolute path where to write logs and files")
+
     opt = parser.parse_args()
     return opt
 
 
 #-------------------------------------------------------------------------------
-# Append Write class
-#   Class for testing plain write to disk mode: {open_append-write-flush-synch-close-wait}...
+# Append-Flush-Close Write class
+#   Class for testing append-flush-close to disk: {open_append-write-flush-close-wait}...
+#   Input:  -fno:   number of files to be written to disk
+#           -fsize: size of each file in bytes
+#           -ftype: content type of each file (e.g., binary, text)
+#           -chunk_size:    number of bytes to be written to disk for each (open_append-write-flush-close) operation
+#           -chunk_time:    wait time in seconds between (open_append-write-flush-close) operations
+#           -itime:         wait time in seconds between close of one file and open of the following file
+#           -sanity_check:  read the data back from disk and contrast it to the source
+#           -output_folder: specify the output folder where to write output
 #-------------------------------------------------------------------------------
 class Append():
     def __init__(self, fno, fsize, ftype, chunk_size=4096, chunk_time=0, itime=0, sanity_check=False, output_folder=CWD):
-        self.test_type      = "append"
+        self.test_type      = "append"       # DO take care of modifying this when you write a new test
         self.ref_timestamp  = int(time.time())
         self.ref_test_name  = self.test_type+"_"+str(self.ref_timestamp)
 
@@ -170,8 +181,8 @@ class Append():
 #    Input:
 #       - payload: data to be written to disk
 #       - fout: filename
-#       - chunk_size: number of bytes to be written for open-write-close cycle
-#       - chunk_time: wait time in seconds between open-write-close cycles
+#       - chunk_size: number of bytes to be written to disk for each (open_append-write-flush-close) cycle
+#       - chunk_time: wait time in seconds between (open_append-write-flush-close) cycles
 #-------------------------------------------------------------------------------
 def append(payload, fout, chunk_size, chunk_time):
     while payload:
@@ -187,30 +198,30 @@ def append(payload, fout, chunk_size, chunk_time):
 
 
 #-------------------------------------------------------------------------------
-# Orchestrate the test
+# Test specifications from the command line
+#   Get test parameters from argument parser
 #-------------------------------------------------------------------------------
-
 # This is the argument parser from keyboard
 #opt = process_opt()
-
+#
 #current_test = Append(opt.file_no, opt.file_size, opt.file_type, opt.chunk_size, opt.chunk_time, opt.inter_time, opt.check_data, opt.out_dir)
 #current_test.run()
 
-'''
+
 #-------------------------------------------------------------------------------
-# Workload specifications
-FILE_NO = 5            # Number of files to be generated
-FILE_SIZE = 1000000    # Size in Bytes of each file
-FILE_TYPE = "text"     # Refer to SUPPORTED_FILETYPES for supported files types (e.g., text, binary, ...)
+# Hard coded test specifications
+#   Manually specify test parameters and run the test
+#-------------------------------------------------------------------------------
+#FILE_NO = 5            # Number of files to be generated
+#FILE_SIZE = 1000000    # Size in Bytes of each file
+#FILE_TYPE = "text"     # Refer to SUPPORTED_FILETYPES for supported files types (e.g., text, binary, ...)
+#
+#CHUNK_SIZE = 350000    # Number of bytes to be written for flush + os.fsync cycle
+#CHUNK_TIME = 0.5       # Wait time in seconds between flush + os.fsync cycle
+#
+#INTER_TIME = 0.5       # Wait time in seconds between write operations of two files
+#CHECK_DATA = True      # Do you want to run the sanity check?
+#
+#current_test = Append(FILE_NO, FILE_SIZE, FILE_TYPE, CHUNK_SIZE, CHUNK_TIME, INTER_TIME, CHECK_DATA)
+#current_test.run()
 
-CHUNK_SIZE = 350000    # Number of bytes to be written for flush + os.fsync cycle
-CHUNK_TIME = 0.5       # Wait time in seconds between flush + os.fsync cycle
-
-INTER_TIME = 0.5       # Wait time in seconds between write operations of two files
-CHECK_DATA = True      # Do you want to run the sanity check?
-
-
-# Instantiate a class and run the test
-current_test = Append(FILE_NO, FILE_SIZE, FILE_TYPE, CHUNK_SIZE, CHUNK_TIME, INTER_TIME, CHECK_DATA)
-current_test.run()
-'''

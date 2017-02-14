@@ -1,3 +1,8 @@
+#-------------------------------------------------------------------------------
+# Plain Write class
+#   Class for testing plain write to disk mode: open-write-close
+#-------------------------------------------------------------------------------
+
 import os
 import sys
 import time
@@ -7,14 +12,11 @@ from argparse import ArgumentParser
 from common_utils import *
 
 
-
 #-------------------------------------------------------------------------------
 # TODO: 
 #   - By now the payload is stored in memory before being dumped to disk (it will not work with huge payloads)
-#   - How do I recover if try catch gets stuck as well? This would cause a loss of statistics...
-#   If possible, store statistics on the local machine
+#   - Is it possible, store logs on the local machine? If I get stuck on the mount I will lose logs as well
 #-------------------------------------------------------------------------------
-
 
 
 #-------------------------------------------------------------------------------
@@ -24,9 +26,6 @@ from common_utils import *
 def process_opt():
     usage = """usage: test_write.py [options]"""
     parser = ArgumentParser(usage=usage)
-
-    parser.add_argument("--output_folder", dest="out_dir", type=str, 
-              help="Absolute path where to write logs and files")
 
     parser.add_argument("--file_no", dest="file_no", type=int, required=True, 
               help="Number of files to be generated")
@@ -41,6 +40,9 @@ def process_opt():
     parser.add_argument("--sanity_check", dest="check_data", action='store_true', default=False, 
               help="Read data from disk and compare MD5 checksums")
 
+    parser.add_argument("--output_folder", dest="out_dir", type=str, 
+              help="Absolute path where to write logs and files")
+
     opt = parser.parse_args()
     return opt
 
@@ -48,10 +50,16 @@ def process_opt():
 #-------------------------------------------------------------------------------
 # Plain Write class
 #   Class for testing plain write to disk mode: open-write-close
+#   Input:  -fno:   number of files to be written to disk
+#           -fsize: size of each file in bytes
+#           -ftype: content type of each file (e.g., binary, text)
+#           -itime: wait time in seconds between close of one file and open of the following file
+#           -sanity_check:  read the data back from disk and contrast it to the source
+#           -output_folder: specify the output folder where to write output
 #-------------------------------------------------------------------------------
 class PlainWrite():
     def __init__(self, fno, fsize, ftype, itime=0, sanity_check=False, output_folder=CWD):
-        self.test_type      = "write"
+        self.test_type      = "write"       # DO take care of modifying this when you write a new test
         self.ref_timestamp  = int(time.time())
         self.ref_test_name  = self.test_type+"_"+str(self.ref_timestamp)
 
@@ -172,25 +180,28 @@ def plain_write(payload, fout):
 
 
 #-------------------------------------------------------------------------------
-# Orchestrate the test
+# Test specifications from the command line
+#   Get test parameters from argument parser
 #-------------------------------------------------------------------------------
 # This is the argument parser from keyboard
 #opt = process_opt()
-
+#
 #current_test = PlainWrite(opt.file_no, opt.file_size, opt.file_type, opt.inter_time, opt.check_data, opt.out_dir)
 #current_test.run()
 
-'''
+
+#-------------------------------------------------------------------------------
+# Hard coded test specifications
+#   Manually specify test parameters and run the test
 #-------------------------------------------------------------------------------
 # Workload specifications
-FILE_NO = 10            # Number of files to be generated
-FILE_SIZE = 100000      # Size in Bytes of each file
-FILE_TYPE = "text"      # Refer to SUPPORTED_FILETYPES for supported files types (e.g., text, binary, ...)
-INTER_TIME = 0.1        # Wait time in seconds between write operations of two files
-CHECK_DATA = True       # Do you want to run the sanity check?
+#FILE_NO = 10           # Number of files to be generated
+#FILE_SIZE = 100000     # Size in Bytes of each file
+#FILE_TYPE = "text"     # Refer to SUPPORTED_FILETYPES for supported files types (e.g., text, binary, ...)
+#INTER_TIME = 0.1       # Wait time in seconds between write operations of two files
+#CHECK_DATA = True      # Do you want to run the sanity check?
+#OUTPUT_DIR = '.'       # Specify the output directory
+#
+#current_test = PlainWrite(FILE_NO, FILE_SIZE, FILE_TYPE, INTER_TIME, CHECK_DATA)
+#current_test.run()
 
-
-# Instantiate a class and run the test
-current_test = PlainWrite(FILE_NO, FILE_SIZE, FILE_TYPE, INTER_TIME, CHECK_DATA)
-current_test.run()
-'''

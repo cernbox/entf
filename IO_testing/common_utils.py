@@ -1,3 +1,8 @@
+#-------------------------------------------------------------------------------
+# Various utilities for IO testing
+#   Provides logging, checksum, and file generation capabilities
+#-------------------------------------------------------------------------------
+
 import hashlib
 import os
 import sys
@@ -7,23 +12,25 @@ import payload_gen
 
 
 #--------------------------------------------------------------------------------
-# Define global variables and supported test/file types and 
+# Global variables
+#   Define global variables, supported file types, and log specifications
 #--------------------------------------------------------------------------------
+SUPPORTED_FILETYPES = ["text", "binary"]
+
 #CWD    = "/eos/user/e/ebocchi/Tests_on_SWAN/IO_testing"
 #CWD    = "/eos/user/c/cboxtu/Enrico_swanIOtesting"
 CWD     = os.getcwd()
-
 RESULTS = "processing"
-SUPPORTED_FILETYPES = ["text", "binary"]
 
 LOG_FOLDER      = "logs"
 LOG_EXTENSION   = ".log"
 LOG_DELIMITER   = "| "
 
 
+
 #--------------------------------------------------------------------------------
 # Logger class
-#   Create a log file to output collected statistics
+#   Create a log file to output collected operations
 #--------------------------------------------------------------------------------
 class Logger():
     def __init__(self, fname):
@@ -64,7 +71,7 @@ class Logger():
 
 #--------------------------------------------------------------------------------
 # Checksum class
-#   Provides support for checksum check on written data
+#   Provides support for checksum verification on written data
 #-------------------------------------------------------------------------------
 class Checksum:
     def __init__(self, sno, fname):
@@ -72,6 +79,7 @@ class Checksum:
         self.fname      = fname
         self.source_md5 = None
         self.disk_md5   = None
+        self.md5_match  = None
 
     def set_source_md5(self, data):
         hash_md5 = hashlib.md5()
@@ -84,15 +92,16 @@ class Checksum:
         self.disk_md5 = hash_md5.hexdigest()
 
     def compare(self):
-        return self.source_md5 == self.disk_md5
+        self.md5_match = True if (self.source_md5 == self.disk_md5) else False
+        return self.md5_match
 
     def make_output_for_logging(self):
         return "\t".join(["%07d" % self.seq_no, self.fname, str(self.compare()), self.source_md5, self.disk_md5])
 
 
 #--------------------------------------------------------------------------------
-# Check file type
-#   Checks whether the requested file type is supported
+# Float to string
+#   Convert float to string with a predefined number of decimal digits
 #--------------------------------------------------------------------------------
 def stringify(float_in):
     return "%.6f" % float_in
@@ -110,7 +119,7 @@ def check_filetype(file_type):
 
 
 #--------------------------------------------------------------------------------
-# Get the payload done by payload_gen.py
+# Get the payload done by payload_gen.py file
 #   Returns the payload as a list with lenght equal to the number of files
 #--------------------------------------------------------------------------------
 def make_payload(file_type, file_no, file_size):
@@ -119,7 +128,6 @@ def make_payload(file_type, file_no, file_size):
     # Plain readable text files
     if (file_type == "text"):
         payload_gen.load_word_list()    # Load the wordlist from file
-        
         for i in range(file_no):
             payload.append(payload_gen.get_text(file_size))
         return payload
@@ -129,4 +137,3 @@ def make_payload(file_type, file_no, file_size):
         for i in range(file_no):
             payload.append(payload_gen.get_binary(file_size))
         return payload
-
