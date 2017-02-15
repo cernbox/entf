@@ -1,0 +1,15 @@
+#VERSION: 6.08.02-99084
+#CVMFS_PATH: /cvmfs/sft.cern.ch/lcg/releases/ROOT/6.08.02-99084/x86_64-slc6-gcc49-opt/tutorials/io
+#
+#test_name                                  md5_checksum
+copyFiles.C.nbconvert.ipynb                 72586925675c275c0e20febf7ff91037
+dirs.C.nbconvert.ipynb                      b49b0b9ec6d718113e0405b02c178024
+double32.C.nbconvert.ipynb                  cfe50daf6b464ea75fb19f6d68307e11
+fildir.C.nbconvert.ipynb                    e8b7685c6a0567ab4df7eea2aec90571
+file.C.nbconvert.ipynb                      f86db8f6ab97ae8b17519849a4d10475
+hadd.C.nbconvert.ipynb                      6f7fbb511e63970c843f44e54836a1ff
+importCode.C.nbconvert.ipynb                d3cf5f2eb3e4a7c567f89c4f05ab031c
+loopdir.C.nbconvert.ipynb                   3a1b7d13b0d68fe6aa4ad290b9d8f316
+mergeSelective.C.nbconvert.ipynb            5212c3bd6ab9b29c47046084fe72ea16
+readCode.C.nbconvert.ipynb                  be717e4b56b66a8ea172328f68e60d38
+testMergeCont.C.nbconvert.ipynb             f7ad09a04ec17fd1141666c7b7f32d1e
