@@ -399,8 +399,8 @@ class Experiment():
 					"success": successes,								# Notebooks matching groundtruth
 					"error": sanity_err, 								# Notebooks NOT matching groundtruth
 					"oth_error": oth_err,								# Notebooks experiencing other errors, e.g., Time-out or IOError
-					"io_err": failure_stats[IO_ERR] if IO_ERR in failure_stats.keys() else 0,					# Notebooks interrupted by IOErrors
-					"timeout_err": failure_stats[TIMEOUT_ERR] if TIMEOUT_ERR in failure_stats.keys() else 0,	# Notebooks interrupted by RuntimeError
+					"io_err": len(failure_stats[IO_ERR]) if IO_ERR in failure_stats.keys() else 0,					# Notebooks interrupted by IOErrors
+					"timeout_err": len(failure_stats[TIMEOUT_ERR]) if TIMEOUT_ERR in failure_stats.keys() else 0,	# Notebooks interrupted by RuntimeError
 					"total_runs": 1,									# Just raise one hand (set to *total* on Grafana side)
 					"ROOT_version": self.ROOTv,							# Report ROOT version being used
 					"Groundtruth_version": self.groundtruth_ROOTv,		# Report groundtruth ROOT version
