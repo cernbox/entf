@@ -1,2 +1,2 @@
-VERSION: 6.08.02-99084
-CVMFS_PATH: /cvmfs/sft.cern.ch/lcg/releases/ROOT/6.08.02-99084/x86_64-slc6-gcc49-opt/tutorials/tree
+#VERSION: 6.08.02-99084
+#CVMFS_PATH: /cvmfs/sft.cern.ch/lcg/releases/ROOT/6.08.02-99084/x86_64-slc6-gcc49-opt/tutorials/tree

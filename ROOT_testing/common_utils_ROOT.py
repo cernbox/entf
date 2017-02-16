@@ -19,9 +19,14 @@ CWD     = os.getcwd()
 RESULTS = "processing"
 SUPPORTED_FILETYPES = ["text", "binary"]
 
+# LOGGER
 LOG_FOLDER      = "logs"
 LOG_EXTENSION   = ".log"
 LOG_DELIMITER   = "| "
+
+# Grafana Monitoring Framework
+MONITORING_HOST = "filer-carbon.cern.ch"
+MONITORING_PORT = 2003
 
 
 #--------------------------------------------------------------------------------
@@ -70,3 +75,16 @@ class Logger():
 #--------------------------------------------------------------------------------
 def stringify(float_in):
     return "%.6f" % float_in
+
+
+#--------------------------------------------------------------------------------
+# Push to Grafana
+#   Report results and statistics to the Grafana monitoring dashboard
+#--------------------------------------------------------------------------------
+def publish_on_grafana(metric, value, timestamp=time.time(), host=MONITORING_HOST, port=MONITORING_PORT):
+    #os.system("echo '%s %s %s' | nc %s %s"%(metric,value,timestamp,host,port))  # Do netcat and push data
+    print metric, value, timestamp
+    return (host, port)
+
+
+
