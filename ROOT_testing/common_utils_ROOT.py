@@ -82,7 +82,7 @@ def stringify(float_in):
 #   Report results and statistics to the Grafana monitoring dashboard
 #--------------------------------------------------------------------------------
 def publish_on_grafana(metric, value, timestamp=time.time(), host=MONITORING_HOST, port=MONITORING_PORT):
-    #os.system("echo '%s %s %s' | nc %s %s"%(metric,value,timestamp,host,port))  # Do netcat and push data
+    os.system("echo '%s %s %s' | nc %s %s"%(metric,value,timestamp,host,port))  # Do netcat and push data
     print metric, value, timestamp
     return (host, port)
 
