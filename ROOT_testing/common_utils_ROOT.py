@@ -87,4 +87,3 @@ def publish_on_grafana(metric, value, timestamp=time.time(), host=MONITORING_HOS
     return (host, port)
 
 
-

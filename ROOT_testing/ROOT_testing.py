@@ -372,6 +372,7 @@ class Experiment():
 	# Publish results on Grafana monitoring dashboard
 	def push_to_grafana(self, namespace=GRAFANA_NAMESPACE):
 		self.log.write("info", "Publishing results on Grafana...")
+		self.log.write("info", "Grafana namespace: "+namespace)
 
 		# Build more detailed stats from the Notebook class dictionary
 		successes	= 0
@@ -422,8 +423,8 @@ class Experiment():
 		self.log.write("info", "End of publishing on Grafana")
 
 
-
 	# TODO: we might want to extend the monitoring to CDash
 	def push_to_CDash(self):
 		#TODO: to be implemented
 		pass
+
