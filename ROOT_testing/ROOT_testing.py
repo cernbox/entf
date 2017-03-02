@@ -117,12 +117,14 @@ class Experiment():
 		# The basics
 		self.test_type      = ttype if (ttype) else os.path.split(folder_in)[1]
 		self.ref_timestamp  = int(time.time())
+		print self.ref_timestamp	# Can be useful for debuggin purposes
 		self.ref_test_name  = self.test_type+"_"+str(self.ref_timestamp)
 
 		# Input/Output folders
 		self.folder_master  = folder_in
 		self.folder_copy    = os.path.join(folder_out, RESULTS, self.ref_test_name)
 		self.folder_res     = os.path.join(folder_out, RESULTS, self.ref_test_name+"_results")
+		self.folder_status	= None
 
 		# ROOT version and CVMFS path (to be loaded from <test_type>.metadata file)
 		self.test_metadata  = os.path.join(os.path.split(self.folder_master)[0], self.test_type+TEST_METADATA_EXT)
@@ -213,13 +215,23 @@ class Experiment():
 	# Output folders initialization
 	def init_output_folder(self):
 		self.log.write("info", "Creating output folders...")
-		shutil.copytree(self.folder_master, self.folder_copy)					# Make a copy of the master notebooks
-		os.makedirs(self.folder_res)											# Initialize result folder
-		self.log.write("info", "Output folders created")
+		try:
+			shutil.copytree(self.folder_master, self.folder_copy)					# Make a copy of the master notebooks
+			os.makedirs(self.folder_res)											# Initialize result folder
+			self.log.write("info", "Output folders created")
+			self.folder_status = True
+		except IOError as err:
+			self.folder_status = False
+			self.log.write("error", "Unable to initialize output folders")
+			self.log.write("error", str(err))
 
 
 	# Run the notebooks
 	def run(self):
+
+		if (not self.folder_status):
+			self.log.write("error", "Unable to run experiments. Exiting...")
+			return -1
 
 		# Look for notebooks in the folder
 		#os.chdir(self.folder_copy)
