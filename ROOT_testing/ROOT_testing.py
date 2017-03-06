@@ -115,7 +115,7 @@ class Notebook():
 #		and to have a ".nbconvert.ipynb" extension (or whatever extension speficied in "NB_EXT")
 #--------------------------------------------------------------------------------
 class Experiment():
-	def __init__(self, folder_in, folder_out=CWD, machine_id=None, ttype=None, exclude_list=None, sanity_check=True, gt_fname=None, to_grafana=True, memory_stats=True):
+	def __init__(self, folder_in, folder_out=CWD, machine_id=None, ttype=None, exclude_list=None, sanity_check=True, gt_fname=None, to_grafana=True, memory_stats=False):
 
 		# The basics
 		self.test_type      = ttype if (ttype) else os.path.split(folder_in)[1]
@@ -473,7 +473,8 @@ class Experiment():
 		self.log.write("info", "Publishing statistics on memory usage on Grafana...")
 		self.log.write("info", "Grafana namespace: "+namespace)
 		for k,v in mem_stats.items():
-			hostname, port_no = publish_on_grafana(k+"_memory", v, self.ref_timestamp)
+			metric = ".".join([namespace, self.machine_id, self.test_type, k+"_memory"])
+			hostname, port_no = publish_on_grafana(metric, v, self.ref_timestamp)
 
 		self.log.write("info", "Grafana host: "+hostname)
 		self.log.write("info", "Grafana port: "+str(port_no))
