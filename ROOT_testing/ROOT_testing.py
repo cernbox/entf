@@ -23,6 +23,9 @@ MD5_ERR		= "md5_mismatch"
 IO_ERR		= "io_err"
 TIMEOUT_ERR	= "timed_out"
 
+# Memory info fname
+MEMINFO_FNAME	= "/proc/meminfo"
+
 # Namespace on Grafana
 #   Should match the pattern "test.swan.<machine_id>.<test_type>.<metric>"
 GRAFANA_NAMESPACE = "test.swan"        # By now, pushing to the testing environment
@@ -112,7 +115,7 @@ class Notebook():
 #		and to have a ".nbconvert.ipynb" extension (or whatever extension speficied in "NB_EXT")
 #--------------------------------------------------------------------------------
 class Experiment():
-	def __init__(self, folder_in, folder_out=CWD, machine_id=None, ttype=None, exclude_list=None, sanity_check=True, gt_fname=None, to_grafana=True):
+	def __init__(self, folder_in, folder_out=CWD, machine_id=None, ttype=None, exclude_list=None, sanity_check=True, gt_fname=None, to_grafana=True, memory_stats=True):
 
 		# The basics
 		self.test_type      = ttype if (ttype) else os.path.split(folder_in)[1]
@@ -147,6 +150,7 @@ class Experiment():
 		# Reporting to monitoring dashboards
 		self.machine_id     = machine_id if (machine_id) else os.path.abspath(os.getcwd()).split(os.path.sep)[-3]
 		self.to_grafana     = to_grafana
+		self.memory_stats	= memory_stats
 
 		# Init the logger
 		self.log            = Logger(os.path.join(folder_out, LOG_FOLDER, self.ref_test_name+LOG_EXTENSION)) 
@@ -177,6 +181,7 @@ class Experiment():
 		self.log.write("parameters", "Sanity check required: "+str(self.check_data))
 		self.log.write("parameters", "Groundtruth file: "+self.groundtruth_fn)
 		self.log.write("parameters", "Push to Grafana: "+str(self.to_grafana))
+		self.log.write("parameters", "Report memory usage statistics: "+str(self.memory_stats))
 
 	# Preliminary checks
 	def run_preliminary_checks(self):
@@ -295,9 +300,38 @@ class Experiment():
 		if (self.check_data):
 			self.run_sanity_check()
 
+		# If you enabled to report statistics about memory usage
+		if (self.memory_stats):
+			self.log.write("info", "Reporting memory usage statistics...")
+			# Load memory usage information
+			mem_stats = {	'total': None,\
+							'free': None, \
+							'used': None, \
+							'available': None,\
+							'cached': None}
+			with open(MEMINFO_FNAME) as fin:
+				for line in fin.read().splitlines():
+					if (line.startswith("MemTotal:")):
+						mem_stats["total"] = line.split()[1]
+					if (line.startswith("MemFree:")):
+						mem_stats["free"] = line.split()[1]
+					if (line.startswith("MemAvailable:")):
+						mem_stats["available"] = line.split()[1]
+					if (line.startswith("Cached:")):
+						mem_stats["cached"] = line.split()[1]
+			if (mem_stats["total"] and mem_stats["free"]):
+				mem_stats["used"] = str(int(mem_stats["total"])-int(mem_stats["free"]))
+			fin.close()
+			# Dump the statistics to the log file
+			for k,v in mem_stats.items():
+				self.log.write("mem", k+"_memory (kB): "+v)
+			self.log.write("info", "End memory usage statistics")
+
 		# If you enabled the push-to-monitoring capability
 		if (self.to_grafana):
 			self.push_to_grafana()
+			if (self.memory_stats):
+				self.memory_to_grafana(mem_stats)
 		#if (self.push_to_CDash):
 		#	self.push_to_CDash()
 
@@ -433,6 +467,17 @@ class Experiment():
 		self.log.write("info", "Grafana host: "+hostname)
 		self.log.write("info", "Grafana port: "+str(port_no))
 		self.log.write("info", "End of publishing on Grafana")
+
+	# Publish memory statistics on Grafana monitoring dashboard
+	def memory_to_grafana(self, mem_stats, namespace=GRAFANA_NAMESPACE):
+		self.log.write("info", "Publishing statistics on memory usage on Grafana...")
+		self.log.write("info", "Grafana namespace: "+namespace)
+		for k,v in mem_stats.items():
+			hostname, port_no = publish_on_grafana(k+"_memory", v, self.ref_timestamp)
+
+		self.log.write("info", "Grafana host: "+hostname)
+		self.log.write("info", "Grafana port: "+str(port_no))
+		self.log.write("info", "End of memory statistics on Grafana")
 
 
 	# TODO: we might want to extend the monitoring to CDash
