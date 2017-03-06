@@ -42,6 +42,7 @@ class Logger():
             "info": "[INFO] ",
             "performance": "[PERF] ", 
             "consistency": "[CONS] ", 
+            "mem": "[MEMORY] ", 
             "warning": "[WARNING] ", 
             "error": "[ERROR] ", 
             }
